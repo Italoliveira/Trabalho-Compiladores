@@ -1,0 +1,5 @@
+.vscode/
+__pycache__/
+arq
+parsetab.py
+parse.out
