@@ -73,6 +73,7 @@ def p_struct_statement(p):
 
 def p_field(p):
     '''field : ID types field
+             | ID ID DOT ID
              | empty'''
     pass
 
@@ -102,9 +103,19 @@ def p_args(p):
             | ID CHAN types COMMA args
             | ID types COMMA args
             | ID COMMA args
+            | ID collection_args COMMA args
+            | ID collection_args
+            | ID POINTER callback
             | p_map_args COMMA args
             | p_map_args
             | empty'''
+    pass
+
+def p_collection_args(p):
+    '''
+        collection_args : LBRACKET RBRACKET POINTER ID
+                        | LBRACKET RBRACKET ID
+    '''
     pass
 
 def p_map_args(p):
@@ -214,7 +225,7 @@ def p_select_cases(p):
 
 # Defer
 def p_defer(p):
-    '''defer : DEFER function'''
+    '''defer : DEFER callback'''
     pass
 
 # Switch
@@ -276,13 +287,21 @@ def p_expression(p):
                   | lambda
                   | decrement
                   | struct
+                  | collection_statement
                   | callback
                   | struct_declaretion
                   | address_pointer
                   | ID
+                  | collection
                   | map_statement
                   | map'''
     pass
+
+def p_collection(p):
+    '''
+        collection  : ID LBRACKET ID RBRACKET DOT ID
+                    | ID LBRACKET ID RBRACKET 
+    '''
 
 # Loops
 def p_for(p):
@@ -333,6 +352,24 @@ def p_struct_declaretion_values(p):
                                  | LBRACE struct_declaretion_values RBRACE'''
     pass
 
+def p_collection_statement(p):
+    '''
+        collection_statement    : LBRACKET RBRACKET POINTER ID LBRACE collection_types RBRACE
+                                | LBRACKET RBRACKET ID LBRACE collection_types RBRACE
+                                | ADDRESS ID LBRACE collection_types RBRACE
+                                | ID LBRACE collection_types RBRACE
+    '''
+    pass
+
+def p_collection_types(p):
+    '''
+        collection_types    : ID
+                            | ID COMMA collection_types
+                            | ID COLON value
+                            | ID COLON value COMMA collection_types
+    '''
+    pass
+
 # Variáveis
 def p_variable_statement(p):
     '''variable_statement : VAR ID EQUAL slice_statement
@@ -340,6 +377,7 @@ def p_variable_statement(p):
                           | VAR ID types EQUAL expression
                           | VAR ID EQUAL expression
                           | VAR ID ID EQUAL expression
+                          | VAR ID callback
                           | ID map_position EQUAL expression
                           | ID COLON_EQUAL expression
                           | map_position COLON_EQUAL expression
@@ -358,6 +396,7 @@ def p_map_position(p):
 def p_variable_redeclaration(p):
     '''variable_redeclaration : ID EQUAL expression
                               | ID ASSIGN_OP expression
+                              | callback ASSIGN_OP expression
                               | ID DOT ID EQUAL expression'''
     pass
 
@@ -397,6 +436,7 @@ def p_struct(p):
 def p_callback(p):
     '''callback : function
                 | ID DOT ID LPAREN ID LPAREN ID RPAREN RPAREN
+                | ID
                 | function DOT callback
                 | ID DOT callback
                 | empty'''
